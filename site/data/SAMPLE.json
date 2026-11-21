@@ -1,0 +1,40 @@
+{
+  "code": "SAMPLE",
+  "subject_name": "Sample subject (made-up demo data)",
+  "generated_at": "2026-11-22T00:00:00+00:00",
+  "days": 5,
+  "papers": ["Sample paper A", "Sample paper B", "Sample paper C"],
+  "sample": true,
+  "modules": [
+    {"number": 1, "title": "Module one", "question_count": 6, "total_marks": 60, "share": 0.2},
+    {"number": 2, "title": "Module two", "question_count": 8, "total_marks": 84, "share": 0.28},
+    {"number": 3, "title": "Module three", "question_count": 5, "total_marks": 54, "share": 0.18},
+    {"number": 4, "title": "Module four", "question_count": 6, "total_marks": 60, "share": 0.2},
+    {"number": 5, "title": "Module five", "question_count": 4, "total_marks": 42, "share": 0.14}
+  ],
+  "repeated_questions": [
+    {"question": "Sample repeated question about a Module 2 concept", "module": 2, "times": 3, "exams": ["Sample paper A", "Sample paper B", "Sample paper C"], "avg_marks": 8},
+    {"question": "Sample derivation that appears often in Module 4", "module": 4, "times": 2, "exams": ["Sample paper A", "Sample paper C"], "avg_marks": 10},
+    {"question": "Sample short-answer question from Module 1", "module": 1, "times": 2, "exams": ["Sample paper B", "Sample paper C"], "avg_marks": 6}
+  ],
+  "web_questions": [
+    {"module": 5, "text": "Sample extra question the Data agent found on the web", "marks": 8}
+  ],
+  "study_plan": [
+    {"day": 1, "focus": "Module 2 (highest weight)", "tasks": ["Revise key concepts", "Solve the 3x repeated question"]},
+    {"day": 2, "focus": "Module 4", "tasks": ["Practise the repeated derivation", "Solve one full Module 4 question"]},
+    {"day": 3, "focus": "Modules 1 and 3", "tasks": ["Short answers from Module 1", "Main topics of Module 3"]},
+    {"day": 4, "focus": "Module 5", "tasks": ["Go through web-sourced questions", "Make one-page notes"]},
+    {"day": 5, "focus": "Revision", "tasks": ["Re-solve every repeated question", "Time yourself on one past paper"]}
+  ],
+  "live": {
+    "notes": ["Live notes from the web will appear here once Radar Data analyses a real subject."],
+    "sources": []
+  },
+  "agent_log": [
+    {"from": "Radar Data", "to": "Radar Builder", "message": "Collected 3 papers. Please build the dashboard."},
+    {"from": "Radar Builder", "to": "Radar Data", "message": "Module 5 has too few questions to rank. Please find more."},
+    {"from": "Radar Data", "to": "Radar Builder", "message": "Found 1 extra web question for Module 5. Data complete."},
+    {"from": "Radar Builder", "to": "students", "message": "Building the dashboard and publishing it."}
+  ]
+}
