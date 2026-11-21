@@ -1,0 +1,18 @@
+{
+  "name": "VTU Exam Radar",
+  "image": "mcr.microsoft.com/devcontainers/python:3.11",
+  "postCreateCommand": "pip install uv && uv sync",
+  "customizations": {
+    "vscode": {
+      "extensions": ["ms-python.python"]
+    }
+  },
+  "secrets": {
+    "GEMINI_API_KEY": { "description": "Gemini API key from aistudio.google.com/apikey" },
+    "RADAR_DATA_ID": { "description": "BAND agent ID for 'Radar Data'" },
+    "RADAR_DATA_KEY": { "description": "BAND agent API key for 'Radar Data'" },
+    "RADAR_BUILDER_ID": { "description": "BAND agent ID for 'Radar Builder'" },
+    "RADAR_BUILDER_KEY": { "description": "BAND agent API key for 'Radar Builder'" },
+    "SITE_URL": { "description": "Your live Vercel link, e.g. https://vtu-exam-radar.vercel.app" }
+  }
+}
