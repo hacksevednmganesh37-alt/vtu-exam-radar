@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>VTU Exam Radar</title>
+  <link rel="stylesheet" href="style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+</head>
+<body>
+  <header class="top">
+    <div class="brand">
+      <span class="logo">◎</span>
+      <div>
+        <h1>VTU Exam Radar</h1>
+        <p>Two AI agents read past VTU papers and tell you what to study first.</p>
+      </div>
+    </div>
+    <label class="picker">
+      Subject
+      <select id="subject"></select>
+    </label>
+  </header>
+
+  <main id="app">
+    <p class="loading">Loading…</p>
+  </main>
+
+  <footer>
+    Built by Radar Data + Radar Builder agents on BAND · Predictions come from past-paper patterns,
+    not official VTU information. Always study the full syllabus.
+  </footer>
+
+  <template id="report-tpl">
+    <div class="sample-banner" hidden>Sample data for demo layout. Real subjects appear once the agents analyse papers.</div>
+
+    <section class="hero card">
+      <div>
+        <p class="code"></p>
+        <h2 class="subject"></h2>
+        <p class="meta"></p>
+      </div>
+      <div class="stats">
+        <div><b class="s-papers"></b><span>papers read</span></div>
+        <div><b class="s-repeats"></b><span>repeated questions</span></div>
+        <div><b class="s-top"></b><span>top module</span></div>
+      </div>
+    </section>
+
+    <section class="grid">
+      <div class="card">
+        <h3>Module weightage</h3>
+        <p class="hint">Share of total marks across all papers read</p>
+        <canvas id="modules-chart" height="220"></canvas>
+      </div>
+      <div class="card">
+        <h3>Live updates from the web</h3>
+        <ul class="live"></ul>
+        <p class="sources"></p>
+      </div>
+    </section>
+
+    <section class="card">
+      <h3>Most repeated questions</h3>
+      <p class="hint">Grouped by meaning, not exact wording</p>
+      <ol class="repeats"></ol>
+    </section>
+
+    <section class="card">
+      <h3>Your study plan</h3>
+      <div class="plan"></div>
+    </section>
+
+    <section class="card web-card" hidden>
+      <h3>Extra questions found on the web</h3>
+      <p class="hint">Radar Builder asked Radar Data for these because some modules had too few past-paper questions</p>
+      <ul class="web"></ul>
+    </section>
+
+    <section class="card">
+      <h3>How the agents worked together</h3>
+      <ol class="log"></ol>
+    </section>
+  </template>
+
+  <script src="app.js"></script>
+</body>
+</html>
