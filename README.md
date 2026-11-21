@@ -23,7 +23,7 @@ Student ──@Radar Data analyse BMATS101 days=5──▶ Radar Data
                        └──── DATA_READY round=2 ──▶│
                                                    │  groups repeated questions, ranks modules,
                                                    │  writes a day-by-day study plan,
-                                                   ▼  publishes to the dashboard (git push → Vercel)
+                                                   ▼  publishes to the dashboard (git push → GitHub Pages)
 Student ◀── "Dashboard ready: top module M2, top repeated questions..., link"
 ```
 
@@ -37,7 +37,9 @@ The agents talk through a **BAND** room using @mentions. The conversation is sav
 ## Tech
 - **BAND**: agent-to-agent messaging (`band-sdk`, LangGraph adapter)
 - **Gemini API**: reading PDFs, grouping similar questions, study plans, live Google Search
-- **Vercel**: hosts the dashboard (`site/` folder, plain HTML + Chart.js)
+- **GitHub Pages**: hosts the dashboard (`site/` folder, plain HTML + Chart.js), redeployed automatically on every push
+
+**Live dashboard:** https://hacksevednmganesh37-alt.github.io/vtu-exam-radar/
 - **GitHub Codespaces**: runs both agents
 
 ## Run it
