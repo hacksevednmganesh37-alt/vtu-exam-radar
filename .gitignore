@@ -1,0 +1,11 @@
+# secrets - never commit
+agent_config.yaml
+.env
+
+# python
+__pycache__/
+*.pyc
+.venv/
+
+# cached analysis (re-created by the agents)
+work/
