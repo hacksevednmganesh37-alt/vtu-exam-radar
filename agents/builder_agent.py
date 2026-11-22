@@ -57,6 +57,8 @@ async def handle(sender: str, text: str, send) -> None:
     action = cmd["action"]
     req = cmd.get("req", "")
     human = sender and not is_agent(sender)
+    if analysis.is_stale(req):
+        return  # old message re-delivered after a restart: skip it
 
     if action == "DATA_READY":
         if not cmd["args"]:
