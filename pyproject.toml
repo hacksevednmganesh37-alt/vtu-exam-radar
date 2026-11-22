@@ -1,12 +1,14 @@
 [project]
 name = "vtu-exam-radar"
-version = "0.1.0"
-description = "Two BAND agents that read VTU past papers and build an exam-prep dashboard"
+version = "0.2.0"
+description = "Three BAND agents that read VTU past papers and build a personal exam plan"
 requires-python = ">=3.11"
 dependencies = [
     "band-sdk[langgraph]==9.1.0",
     "google-genai>=1.0.0",
     "pyyaml>=6.0",
+    "fastapi>=0.110",
+    "uvicorn>=0.29",
 ]
 
 [tool.uv]
