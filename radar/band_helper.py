@@ -3,6 +3,7 @@
 Agents only receive messages that @mention them, so every agent-to-agent
 message below passes the other agent's name in `mentions`.
 """
+import json
 import logging
 import os
 import re
@@ -34,6 +35,24 @@ SENDER = re.compile(r"^\[(?P<sender>[^\]]+)\]:\s*(?P<text>.*)$", re.DOTALL)
 
 Send = Callable[[str, list[str]], Awaitable[None]]
 Handler = Callable[[str, str, Send], Awaitable[None]]
+
+
+def extract_messages(content: str) -> list[tuple[str, str]]:
+    """BAND SDK 9.x delivers a turn as a preamble + one JSON object per message
+    ({"sender_name": ..., "content": ...}). Older formats use "[Sender]: text"."""
+    found = []
+    for line in content.splitlines():
+        line = line.strip()
+        if line.startswith("{") and '"content"' in line:
+            try:
+                obj = json.loads(line)
+            except json.JSONDecodeError:
+                continue
+            found.append((str(obj.get("sender_name", "")), str(obj.get("content", ""))))
+    if not found:
+        match = SENDER.match(content)
+        found.append((match.group("sender") if match else "", match.group("text") if match else content))
+    return found
 
 
 def write_config_from_env() -> None:
@@ -71,15 +90,15 @@ def run_agent(config_key: str, handler: Handler) -> None:
             if not state["messages"]:
                 return {"messages": []}
             content = str(state["messages"][-1].content)
-            match = SENDER.match(content)
-            sender = match.group("sender") if match else ""
-            text = strip_leading_mentions(match.group("text") if match else content).strip()
-            try:
-                await handler(sender, text, send)
-            except Exception as err:  # tell the room instead of crashing silently
-                logging.exception("handler failed")
-                if sender and not is_agent(sender):
-                    await send(f"Sorry, something went wrong: {err}", [sender])
+            for sender, raw in extract_messages(content):
+                text = strip_leading_mentions(raw).strip()
+                logging.warning("RADAR got from %r: %r", sender, text[:300])
+                try:
+                    await handler(sender, text, send)
+                except Exception as err:  # tell the room instead of crashing silently
+                    logging.exception("handler failed")
+                    if sender and not is_agent(sender):
+                        await send(f"Sorry, something went wrong: {err}", [sender])
             return {"messages": []}
 
         graph = StateGraph(MessagesState)
@@ -101,7 +120,10 @@ def parse_command(text: str) -> dict:
     # remove any @mentions of our agents (names have spaces, so do it explicitly)
     for name in AGENT_NAMES:
         text = text.replace(f"@{name}", " ")
-    text = text.strip()
+    words0 = text.split()
+    while words0 and words0[0].startswith("@"):  # BAND may render mentions as @handle or @[id]
+        words0.pop(0)
+    text = " ".join(words0)
     for leftover in {n.split()[-1] for n in AGENT_NAMES}:  # e.g. "Builder DATA_READY ..."
         if text.split(" ", 1)[0] == leftover:
             text = text.split(" ", 1)[1] if " " in text else ""
