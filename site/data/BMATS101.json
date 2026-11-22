@@ -1,0 +1,282 @@
+{
+  "code": "BMATS101",
+  "subject_name": "Mathematics-I for Computer Science Engineering Stream (BMATS101)",
+  "generated_at": "2026-11-22T03:24:20+00:00",
+  "days": 5,
+  "papers": [
+    "Model Question Paper- I with effect from 2022",
+    "Model Question Paper-I (2021 CBCS Scheme)",
+    "First Semester B.E Degree Examination"
+  ],
+  "modules": [
+    {
+      "number": 1,
+      "title": "",
+      "question_count": 18,
+      "total_marks": 120.0,
+      "share": 0.204
+    },
+    {
+      "number": 2,
+      "title": "",
+      "question_count": 16,
+      "total_marks": 107.0,
+      "share": 0.182
+    },
+    {
+      "number": 3,
+      "title": "",
+      "question_count": 18,
+      "total_marks": 120.0,
+      "share": 0.204
+    },
+    {
+      "number": 4,
+      "title": "",
+      "question_count": 18,
+      "total_marks": 120.0,
+      "share": 0.204
+    },
+    {
+      "number": 5,
+      "title": "",
+      "question_count": 18,
+      "total_marks": 120.0,
+      "share": 0.204
+    }
+  ],
+  "repeated_questions": [
+    {
+      "question": "Pedal Equation of Polar Curves",
+      "module": 1,
+      "times": 3,
+      "exams": [
+        "First Semester B.E Degree Examination",
+        "Model Question Paper- I with effect from 2022",
+        "Model Question Paper-I (2021 CBCS Scheme)"
+      ],
+      "avg_marks": 7.3
+    },
+    {
+      "question": "Solving Linear Systems (Gauss-Seidel Iteration Method)",
+      "module": 5,
+      "times": 3,
+      "exams": [
+        "First Semester B.E Degree Examination",
+        "Model Question Paper- I with effect from 2022",
+        "Model Question Paper-I (2021 CBCS Scheme)"
+      ],
+      "avg_marks": 7.3
+    },
+    {
+      "question": "Partial Differentiation (Chain Rule for Composite Functions)",
+      "module": 2,
+      "times": 3,
+      "exams": [
+        "First Semester B.E Degree Examination",
+        "Model Question Paper- I with effect from 2022",
+        "Model Question Paper-I (2021 CBCS Scheme)"
+      ],
+      "avg_marks": 7.0
+    },
+    {
+      "question": "Extreme Values of Multivariable Functions",
+      "module": 2,
+      "times": 3,
+      "exams": [
+        "First Semester B.E Degree Examination",
+        "Model Question Paper- I with effect from 2022",
+        "Model Question Paper-I (2021 CBCS Scheme)"
+      ],
+      "avg_marks": 7.0
+    },
+    {
+      "question": "Orthogonal Trajectories of Curves",
+      "module": 3,
+      "times": 3,
+      "exams": [
+        "First Semester B.E Degree Examination",
+        "Model Question Paper- I with effect from 2022",
+        "Model Question Paper-I (2021 CBCS Scheme)"
+      ],
+      "avg_marks": 7.0
+    },
+    {
+      "question": "Differential Equations Solvable for p (Clairaut's Form & Reducible)",
+      "module": 3,
+      "times": 3,
+      "exams": [
+        "First Semester B.E Degree Examination",
+        "Model Question Paper- I with effect from 2022",
+        "Model Question Paper-I (2021 CBCS Scheme)"
+      ],
+      "avg_marks": 7.0
+    },
+    {
+      "question": "Applications of First-Order Linear Differential Equations",
+      "module": 3,
+      "times": 3,
+      "exams": [
+        "First Semester B.E Degree Examination",
+        "Model Question Paper- I with effect from 2022",
+        "Model Question Paper-I (2021 CBCS Scheme)"
+      ],
+      "avg_marks": 7.0
+    },
+    {
+      "question": "Solving Linear Systems (Gauss-Jordan Method)",
+      "module": 5,
+      "times": 3,
+      "exams": [
+        "First Semester B.E Degree Examination",
+        "Model Question Paper- I with effect from 2022",
+        "Model Question Paper-I (2021 CBCS Scheme)"
+      ],
+      "avg_marks": 7.0
+    },
+    {
+      "question": "Angle between Two Polar Curves",
+      "module": 1,
+      "times": 3,
+      "exams": [
+        "First Semester B.E Degree Examination",
+        "Model Question Paper- I with effect from 2022",
+        "Model Question Paper-I (2021 CBCS Scheme)"
+      ],
+      "avg_marks": 6.8
+    },
+    {
+      "question": "Consistency of Linear Systems (with/without parameters)",
+      "module": 5,
+      "times": 3,
+      "exams": [
+        "First Semester B.E Degree Examination",
+        "Model Question Paper- I with effect from 2022",
+        "Model Question Paper-I (2021 CBCS Scheme)"
+      ],
+      "avg_marks": 6.7
+    },
+    {
+      "question": "Limits using L'Hopital's Rule (Indeterminate Forms)",
+      "module": 2,
+      "times": 3,
+      "exams": [
+        "First Semester B.E Degree Examination",
+        "Model Question Paper- I with effect from 2022",
+        "Model Question Paper-I (2021 CBCS Scheme)"
+      ],
+      "avg_marks": 6.3
+    },
+    {
+      "question": "Eigenvalue and Eigenvector (Power Method)",
+      "module": 5,
+      "times": 3,
+      "exams": [
+        "First Semester B.E Degree Examination",
+        "Model Question Paper- I with effect from 2022",
+        "Model Question Paper-I (2021 CBCS Scheme)"
+      ],
+      "avg_marks": 6.3
+    }
+  ],
+  "web_questions": [],
+  "study_plan": [
+    {
+      "day": 1,
+      "focus": "Module 5 - Linear Algebra and Numerical Methods",
+      "tasks": [
+        "Review Matrix Rank and Echelon Form.",
+        "Practice Consistency of Linear Systems (with/without parameters).",
+        "Practice Solving Linear Systems using Gauss-Jordan Method.",
+        "Practice Solving Linear Systems using Gauss-Seidel Iteration Method.",
+        "Study Eigenvalues and Eigenvectors (Power Method)."
+      ]
+    },
+    {
+      "day": 2,
+      "focus": "Module 3 - Differential Equations",
+      "tasks": [
+        "Review Exact Differential Equations and Integrating Factors.",
+        "Practice Differential Equations Solvable for p (Clairaut's Form & Reducible).",
+        "Practice finding Orthogonal Trajectories of Curves.",
+        "Study Applications of First-Order Linear Differential Equations (e.g., Newton's Law of Cooling, L-R circuits)."
+      ]
+    },
+    {
+      "day": 3,
+      "focus": "Module 1 - Differential Calculus-I",
+      "tasks": [
+        "Review Polar Coordinates and related curves.",
+        "Practice deriving Pedal Equation of Polar Curves.",
+        "Practice finding the Angle between Two Polar Curves.",
+        "Study Radius of Curvature (Cartesian and Polar forms).",
+        "Understand Maclaurin's and Taylor's Series expansions."
+      ]
+    },
+    {
+      "day": 4,
+      "focus": "Module 2 - Differential Calculus-II",
+      "tasks": [
+        "Practice Partial Differentiation (Chain Rule for Composite Functions).",
+        "Practice finding Extreme Values of Multivariable Functions.",
+        "Practice Limits using L'Hopital's Rule (Indeterminate Forms).",
+        "Understand Jacobians and their properties.",
+        "Review Euler's Theorem for Homogeneous Functions."
+      ]
+    },
+    {
+      "day": 5,
+      "focus": "Module 4 - Vector Calculus & Comprehensive Revision",
+      "tasks": [
+        "Study Scalar and Vector fields, and their properties.",
+        "Understand Gradient, Divergence, and Curl of scalar/vector fields.",
+        "Practice identifying Solenoidal and Irrotational fields.",
+        "Review basic concepts of Line Integrals.",
+        "Quick revision of all key formulas and concepts from Modules 1-5.",
+        "Solve 2-3 past paper questions from each module, prioritizing the most repeated questions.",
+        "Self-assess weak areas and do a final brush-up."
+      ]
+    }
+  ],
+  "live": {
+    "notes": [
+      "The latest official scheme for BMATS101, now referred to as 1BMATS101 (Calculus and Linear Algebra: CSE Stream), is the VTU 2025 Scheme.",
+      "Recent syllabus changes for 1BMATS101 include the introduction of 'Vector Spaces' and 'Linear Transformations' as new modules (Modules 4 and 5) for the first semester Computer Science branches, effective from 2025.",
+      "The syllabus for 1BMATS101 under the 2025 scheme covers Calculus, Vector Calculus, System of Linear Equations, Eigenvalues and Eigenvectors, Vector Spaces, and Linear Transformations.",
+      "VTU has released a draft timetable for the Semester End Examination for UG and PG Courses for December 2026/January 2027.",
+      "A revised timetable for the VII-Semester B.E./B.Tech. Examination for December 2026/January 2027 has also been circulated."
+    ],
+    "sources": [
+      {
+        "title": "vtuadda.com",
+        "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQE-fYJm9yJhbtZFA_KqTb9lPYQM4kErsa6LB617IoFujD5GKQ6R80QA2A0mGziRZ8Ew98Ly4ifa4msj-aCAdSvOM4LHcn1oq9zTQO10VbCCU5FTOZf8tbdxLfVK8Kk8MRA="
+      },
+      {
+        "title": "youtube.com",
+        "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQFBLuFFCUy_Trd4iS3fEgFSOLnvEfPcK8EqJQkhweWyP-C8E2-8zrVyBDrsw1ESeBqqZB7swF_D4Lxh6csmZPHphSzumBclxgXH6vNoRcD8pKqWSN5EIs_NSFLXTLCBeMz6oPJOlpk="
+      },
+      {
+        "title": "gateiit.com",
+        "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQFIP51srG0i9csQITkXx-ViYXlhgdhpkqocgZkcj-lAYkZBOMGQy3OpIo3FN6xN6qzsObe2Md4lQnOJs4Tu8mAGkP7B2KoctT02ZoATnKdYcYgIn8l3qrfTjyV5NLWMNlWz6RRpin86qRLcorNBAl5C5KAbpCwk5wjaQHLHwbQqCg=="
+      },
+      {
+        "title": "vtu.ac.in",
+        "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQGyo4zZVBZ4xheLSJAN35UUY49sS4x7ouW8tF5Yr_JQpxYc5JeQgLu3-22hyicOX5-9NE6iiKi5S8TLzrw2jk4QNXuldbojy9VsnK8tq7aN1PQbT8n2aXpBDaX_ffMNb6ACTpuZjsOT"
+      },
+      {
+        "title": "vtu.ac.in",
+        "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHRVNazE29zquhPX6lSKWm3xg8SeezVghPV99dgMI4CgpzP9vgDDuwusseTF6BLm_dTGd8r7VrLY41HdsBlvWmNrvkqdKaTYnxHmK1M9gaykale0LtvM4j_dnTRMaDdbOTzC-uLt6KBMvn4jYC_MQUh"
+      }
+    ],
+    "checked_at": "2026-11-22T03:23:07+00:00"
+  },
+  "agent_log": [
+    {
+      "time": "2026-11-22T03:23:07+00:00",
+      "from": "Radar Data",
+      "to": "Radar Builder",
+      "message": "Collected 88 questions."
+    }
+  ],
+  "sample": false
+}

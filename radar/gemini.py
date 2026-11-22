@@ -22,7 +22,7 @@ def client() -> genai.Client:
                 "GEMINI_API_KEY is not set. Add it as a Codespaces secret "
                 "(get a key at aistudio.google.com/apikey)."
             )
-        _client = genai.Client(api_key=key)
+        _client = genai.Client(api_key=key, http_options=types.HttpOptions(api_version="v1beta"))
     return _client
 
 
