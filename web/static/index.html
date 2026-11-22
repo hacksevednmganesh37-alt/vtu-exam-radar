@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>VTU Exam Radar - your personal exam planner</title>
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+  <header class="top">
+    <div class="brand">
+      <span class="logo">◎</span>
+      <div>
+        <h1>VTU Exam Radar</h1>
+        <p>VTU sites give you papers. We get you exam-ready.</p>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section class="card" id="form-card">
+      <h2>Make my exam plan</h2>
+      <p class="hint">Three AI agents read past VTU papers, find what keeps coming back, and plan your days around your weak spots.</p>
+      <form id="plan-form">
+        <label>Subject
+          <select id="code" required></select>
+        </label>
+        <label>Exam date
+          <input type="date" id="exam_date" required />
+        </label>
+        <fieldset>
+          <legend>Modules you find hard (optional)</legend>
+          <div class="chips">
+            <label class="chip"><input type="checkbox" value="1" />Module 1</label>
+            <label class="chip"><input type="checkbox" value="2" />Module 2</label>
+            <label class="chip"><input type="checkbox" value="3" />Module 3</label>
+            <label class="chip"><input type="checkbox" value="4" />Module 4</label>
+            <label class="chip"><input type="checkbox" value="5" />Module 5</label>
+          </div>
+        </fieldset>
+        <label>Hours you can study per day: <b id="hours-out">4</b>
+          <input type="range" id="hours" min="1" max="12" step="0.5" value="4" />
+        </label>
+        <button type="submit" id="go">Make my plan</button>
+        <p class="error" id="form-error" hidden></p>
+      </form>
+    </section>
+
+    <section class="card" id="live-card" hidden>
+      <h2>Agents at work <span class="pulse" id="pulse"></span></h2>
+      <p class="hint">This is the real conversation between the agents in the BAND room.</p>
+      <ol class="log" id="log"></ol>
+    </section>
+
+    <section id="result" hidden>
+      <section class="card hero">
+        <div>
+          <p class="code" id="r-code"></p>
+          <h2 id="r-subject"></h2>
+          <p class="meta" id="r-meta"></p>
+        </div>
+        <div class="stats">
+          <div><b id="r-days"></b><span>days planned</span></div>
+          <div><b id="r-repeats"></b><span>repeated questions</span></div>
+          <div><b id="r-papers"></b><span>papers read</span></div>
+        </div>
+      </section>
+
+      <section class="card">
+        <h3>Your day-by-day plan</h3>
+        <p class="hint" id="r-plan-hint"></p>
+        <div class="plan" id="r-plan"></div>
+      </section>
+
+      <section class="card">
+        <h3>Most repeated questions, with short model answers</h3>
+        <p class="hint">Click a question to see how to answer it.</p>
+        <div id="r-repeats-list"></div>
+      </section>
+
+      <section class="card">
+        <h3>Live updates from the web</h3>
+        <ul class="live" id="r-live"></ul>
+        <p class="sources" id="r-sources"></p>
+      </section>
+
+      <p class="center"><button id="again" class="ghost">Make another plan</button></p>
+    </section>
+  </main>
+
+  <footer>
+    Built by Radar Desk + Radar Data + Radar Builder on BAND, powered by Gemini.
+    Predictions come from past-paper patterns, not official VTU information. Always cover the full syllabus.
+  </footer>
+  <script src="/static/app.js"></script>
+</body>
+</html>
