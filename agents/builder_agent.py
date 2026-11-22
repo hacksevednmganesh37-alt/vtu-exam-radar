@@ -29,7 +29,13 @@ async def build_and_publish(code: str, days: int, requester: str, req: str, send
     else:
         analysis.log_message(code, BUILDER_NAME, requester or "students", "Building the subject dashboard and publishing it.")
 
-    report = await asyncio.to_thread(analysis.build_report, code, days, request)
+    try:
+        report = await asyncio.to_thread(analysis.build_report, code, days, request)
+    except Exception:
+        if request:
+            analysis.fail_request(req, code, BUILDER_NAME,
+                                  "Sorry, I couldn't finish the plan right now (the AI service is busy). Please try again in a few minutes.")
+        raise
 
     if request:
         request = analysis.load_request(req) or request
