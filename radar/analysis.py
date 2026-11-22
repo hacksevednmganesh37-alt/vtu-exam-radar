@@ -73,6 +73,26 @@ def load_request(req_id: str) -> dict | None:
     return read_json(REQ_DIR / f"{req_id}.json", None)
 
 
+STALE_MINUTES = 15
+
+
+def is_stale(req_id: str) -> bool:
+    """True for a web request that is unknown, already answered, or too old.
+
+    After a restart BAND re-delivers old messages; without this check the agents
+    would rebuild every old request before getting to the student who is waiting now."""
+    if not req_id:
+        return False
+    r = load_request(req_id)
+    if not r or r.get("status") == "done":
+        return True
+    try:
+        created = datetime.fromisoformat(r["created"])
+    except (KeyError, ValueError, TypeError):
+        return True
+    return (datetime.now(timezone.utc) - created).total_seconds() > STALE_MINUTES * 60
+
+
 def days_until(exam_date: str) -> int:
     try:
         d = datetime.strptime(exam_date, "%Y-%m-%d").date()
