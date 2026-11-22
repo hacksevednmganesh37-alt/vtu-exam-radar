@@ -41,7 +41,10 @@ def read_json(path: Path, default):
 
 def write_json(path: Path, data) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(data, indent=2, ensure_ascii=False))
+    # write to a temp file and swap it in, so a reader never sees a half-written file
+    tmp = path.with_name(path.name + ".tmp")
+    tmp.write_text(json.dumps(data, indent=2, ensure_ascii=False))
+    tmp.replace(path)
 
 
 def log_message(code: str, sender: str, to: str, message: str, req: str | None = None) -> None:
