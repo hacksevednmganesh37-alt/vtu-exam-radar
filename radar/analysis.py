@@ -6,7 +6,9 @@ Folder layout:
   work/<SUBJECT_CODE>/                 cache + agent conversation log
   site/data/<SUBJECT_CODE>.json        what the dashboard shows
 """
+import hashlib
 import json
+import logging
 import subprocess
 from collections import defaultdict
 from datetime import datetime, timezone
@@ -87,13 +89,25 @@ def is_stale(req_id: str) -> bool:
     if not req_id:
         return False
     r = load_request(req_id)
-    if not r or r.get("status") == "done":
+    if not r or r.get("status") in ("done", "error"):
         return True
     try:
         created = datetime.fromisoformat(r["created"])
     except (KeyError, ValueError, TypeError):
         return True
     return (datetime.now(timezone.utc) - created).total_seconds() > STALE_MINUTES * 60
+
+
+def fail_request(req_id: str, code: str, sender: str, message: str) -> None:
+    """Tell the waiting student something went wrong, instead of leaving them waiting."""
+    r = load_request(req_id)
+    if not r:
+        return
+    log_message(code, sender, "Radar Desk", message, req_id)
+    r = load_request(req_id) or r
+    r["status"] = "error"
+    r["error"] = message
+    save_request(r)
 
 
 def days_until(exam_date: str) -> int:
@@ -169,6 +183,25 @@ Return JSON: {{"notes": ["short fact 1", "short fact 2", "..."]}} (3-5 notes, ea
     return {"notes": notes, "sources": sources[:5], "checked_at": now()}
 
 
+LIVE_MAX_AGE_HOURS = 6
+
+
+def cached_live_notes(code: str, subject_name: str) -> dict:
+    """Web notes change slowly: reuse the last check for a few hours (saves API quota)."""
+    previous = read_json(work_dir(code) / "dataset.json", {}).get("live") or {}
+    try:
+        age = (datetime.now(timezone.utc) - datetime.fromisoformat(previous["checked_at"])).total_seconds()
+    except (KeyError, ValueError, TypeError):
+        age = None
+    if previous.get("notes") and age is not None and age < LIVE_MAX_AGE_HOURS * 3600:
+        return previous
+    try:
+        return live_notes(code, subject_name)
+    except Exception as err:  # quota / network: keep the old notes rather than failing
+        logging.warning("live web check failed: %s", err)
+        return previous or {"notes": [], "sources": [], "checked_at": now()}
+
+
 def collect(code: str) -> dict:
     """Data Agent main job: read all papers + syllabus + live web notes into one dataset."""
     papers = [read_paper(code, pdf) for pdf in paper_files(code)]
@@ -202,7 +235,7 @@ def collect(code: str) -> dict:
         "syllabus": syllabus,
         "questions": questions,
         "web_questions": [],
-        "live": live_notes(code, subject_name),
+        "live": cached_live_notes(code, subject_name),
         "collected_at": now(),
     }
     write_json(work_dir(code) / "dataset.json", dataset)
@@ -319,7 +352,18 @@ def repeated_questions(dataset: dict) -> list[dict]:
     qs = dataset["questions"]
     by_id = {q["id"]: q for q in qs}
     listing = "\n".join(f"[{q['id']}] (Module {q['module']}) {q['text']}" for q in qs)
-    groups = gemini.ask_json(CLUSTER_PROMPT.format(questions=listing)).get("groups", [])
+    key = hashlib.sha256(listing.encode()).hexdigest()
+    cache_path = work_dir(dataset["code"]) / "groups.json"
+    cache = read_json(cache_path, {})
+    if cache.get("key") == key:
+        groups = cache["groups"]
+    else:
+        try:
+            groups = gemini.ask_json(CLUSTER_PROMPT.format(questions=listing)).get("groups", [])
+            write_json(cache_path, {"key": key, "groups": groups})
+        except Exception as err:  # fall back to the last grouping we have, or none
+            logging.warning("grouping failed: %s", err)
+            groups = cache.get("groups") or [{"title": q["text"], "ids": [q["id"]]} for q in qs]
 
     result = []
     for g in groups:
@@ -338,6 +382,30 @@ def repeated_questions(dataset: dict) -> list[dict]:
     return result
 
 
+def simple_plan(days: int, hours: float, weak: list[int], modules: list[dict], top: list[dict]) -> list[dict]:
+    """Backup planner (no AI): weak modules first, then by marks share; last day is revision."""
+    order = sorted(modules, key=lambda m: (m["number"] not in weak, -m["share"]))
+    study_days = max(days - 1, 1)
+    per_day = [order[i::study_days] for i in range(study_days)] if days > 1 else [order]
+    plan = []
+    for d, mods in enumerate(per_day, start=1):
+        if not mods:
+            continue
+        share = round(hours / len(mods), 1)
+        tasks = []
+        for m in mods:
+            qs = [r["question"] for r in top if r["module"] == m["number"]][:2]
+            label = f"Module {m['number']}" + (f" - {m['title']}" if m.get("title") else "")
+            tasks.append(f"({share}h) {label}: theory, then practise " + ("; ".join(qs) if qs else "past-paper questions"))
+        focus = " & ".join(f"Module {m['number']}" for m in mods)
+        plan.append({"day": d, "focus": focus, "tasks": tasks})
+    if days > 1:
+        plan.append({"day": days, "focus": "Revision + timed practice",
+                     "tasks": [f"({round(hours / 2, 1)}h) Revise formulas and model answers of the top repeated questions",
+                               f"({round(hours / 2, 1)}h) Timed practice: " + "; ".join(r["question"] for r in top[:4])]})
+    return plan
+
+
 def build_report(code: str, days: int, request: dict | None = None) -> dict:
     """Subject report. With a student request, the plan is personalised (days left, hours, weak modules)."""
     dataset = load_dataset(code)
@@ -345,7 +413,11 @@ def build_report(code: str, days: int, request: dict | None = None) -> dict:
     repeated = repeated_questions(dataset)
     top = repeated[:12]
 
-    answers = model_answers(code, [r["question"] for r in top[:8]])
+    try:
+        answers = model_answers(code, [r["question"] for r in top[:8]])
+    except Exception as err:
+        logging.warning("model answers failed: %s", err)
+        answers = {}
     for r in top:
         r["answer"] = answers.get(r["question"], "")
 
@@ -354,10 +426,16 @@ def build_report(code: str, days: int, request: dict | None = None) -> dict:
     weak_text = ", ".join(f"Module {m}" for m in weak) if weak else "none given"
     weights = ", ".join(f"Module {m['number']}: {m['share']:.0%}" for m in modules)
     rep_text = "; ".join(f"{r['question']} (asked {r['times']}x, Module {r['module']})" for r in top)
-    plan = gemini.ask_json(PLAN_PROMPT.format(
-        days=days, subject=dataset["subject_name"], weights=weights, repeated=rep_text,
-        hours=hours, weak=weak_text,
-    )).get("plan", [])
+    try:
+        plan = gemini.ask_json(PLAN_PROMPT.format(
+            days=days, subject=dataset["subject_name"], weights=weights, repeated=rep_text,
+            hours=hours, weak=weak_text,
+        )).get("plan", [])
+    except Exception as err:
+        logging.warning("Gemini plan failed (%s); using the built-in planner", err)
+        plan = []
+    if not plan:
+        plan = simple_plan(days, hours, weak, modules, top)
 
     report = {
         "code": code,
