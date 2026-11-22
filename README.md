@@ -52,7 +52,7 @@ are no message loops.
 
 ## Tech
 - **BAND**: agent-to-agent messaging (`band-sdk`, LangGraph adapter, REST API for the web app)
-- **Gemini API** (`gemini-2.5-flash`): reading PDFs, grouping similar questions, model answers, plans, Google Search grounding
+- **Gemini API** (`gemini-3.5-flash`, falls back to other Gemini models if one is busy or out of quota): reading PDFs, grouping similar questions, model answers, plans, Google Search grounding
 - **FastAPI**: the Radar Desk web app (`web/`)
 - **GitHub Pages**: the public dashboard (`site/`)
 - **GitHub Codespaces**: runs all three agents
