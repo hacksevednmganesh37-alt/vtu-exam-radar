@@ -81,7 +81,11 @@ async function poll(id) {
     return;
   }
   if (r.status === "error") {
-    $("log").append(make("li", "error", r.error || "Something went wrong."));
+    const li = make("li", "error", r.error || "Something went wrong.");
+    const again = make("a", "", " Try again");
+    again.href = location.pathname;
+    li.append(again);
+    $("log").append(li);
     $("pulse").classList.add("done");
     return;
   }
