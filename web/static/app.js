@@ -45,6 +45,7 @@ $("plan-form").addEventListener("submit", async e => {
     $("live-card").hidden = false;
     $("log").innerHTML = ""; shown = 0;
     $("pulse").classList.remove("done");
+    history.replaceState(null, "", `?req=${data.id}`);  // a refresh keeps the plan
     poll(data.id);
   } catch (err) {
     $("form-error").textContent = err.message;
@@ -57,8 +58,16 @@ $("plan-form").addEventListener("submit", async e => {
 
 async function poll(id) {
   clearTimeout(timer);
-  const res = await fetch(`/api/plan/${id}`, { cache: "no-store" });
-  const r = await res.json();
+  let r;
+  try {
+    const res = await fetch(`/api/plan/${id}`, { cache: "no-store" });
+    if (!res.ok) throw new Error(res.status);
+    r = await res.json();
+  } catch (err) {
+    // a single failed check (network blip, file being written) must not stop the updates
+    timer = setTimeout(() => poll(id), 2000);
+    return;
+  }
   const events = r.events || [];
   for (; shown < events.length; shown++) {
     const m = events[shown];
@@ -126,8 +135,16 @@ function render(p, req) {
 }
 
 $("again").addEventListener("click", () => {
+  history.replaceState(null, "", location.pathname);
   $("result").hidden = true; $("live-card").hidden = true; $("form-card").hidden = false;
   window.scrollTo({ top: 0, behavior: "smooth" });
 });
 
 loadSubjects();
+
+const resumeId = new URLSearchParams(location.search).get("req");
+if (resumeId && /^[A-Za-z0-9-]+$/.test(resumeId)) {
+  $("form-card").hidden = true;
+  $("live-card").hidden = false;
+  poll(resumeId);
+}
