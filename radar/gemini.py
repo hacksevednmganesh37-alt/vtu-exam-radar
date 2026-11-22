@@ -1,14 +1,21 @@
 """Small wrapper around the Gemini API (google-genai package)."""
 import json
+import logging
 import os
 import re
+import time
 
 from google import genai
+from google.genai import errors as genai_errors
 from google.genai import types
 
 # Change this in your Codespace if Google releases a newer model:
 #   export GEMINI_MODEL="gemini-2.5-flash"
 MODEL = os.environ.get("GEMINI_MODEL", "gemini-2.5-flash")
+# Each model has its own free-tier quota. If one is used up (HTTP 429) we try the next.
+FALLBACKS = [m.strip() for m in os.environ.get(
+    "GEMINI_FALLBACK_MODELS", "gemini-2.5-flash-lite,gemini-2.0-flash").split(",") if m.strip()]
+_exhausted: dict[str, float] = {}   # model -> time it ran out (skip it for a while)
 
 _client = None
 
@@ -26,6 +33,23 @@ def client() -> genai.Client:
     return _client
 
 
+def generate(contents, config):
+    """generate_content with model fallback when a model's quota is used up."""
+    models = [m for m in dict.fromkeys([MODEL, *FALLBACKS])
+              if time.time() - _exhausted.get(m, 0) > 15 * 60] or [MODEL]
+    last_err = None
+    for model in models:
+        try:
+            return client().models.generate_content(model=model, contents=contents, config=config)
+        except genai_errors.ClientError as err:
+            if getattr(err, "code", None) not in (429, 404):
+                raise
+            logging.warning("Gemini model %s unavailable (%s), trying the next one", model, err.code)
+            _exhausted[model] = time.time()
+            last_err = err
+    raise last_err
+
+
 def upload(path: str):
     """Upload a PDF so Gemini can read it."""
     return client().files.upload(file=path)
@@ -34,24 +58,18 @@ def upload(path: str):
 def ask_json(prompt: str, files: list | None = None) -> dict | list:
     """Ask Gemini and get JSON back."""
     contents = [*(files or []), prompt]
-    resp = client().models.generate_content(
-        model=MODEL,
-        contents=contents,
-        config=types.GenerateContentConfig(
-            response_mime_type="application/json",
-            temperature=0.2,
-        ),
-    )
+    resp = generate(contents, types.GenerateContentConfig(
+        response_mime_type="application/json",
+        temperature=0.2,
+    ))
     return json.loads(resp.text)
 
 
 def ask_web(prompt: str) -> tuple[dict | list | None, list[dict]]:
     """Ask Gemini with live Google Search. Returns (parsed JSON or None, sources)."""
-    resp = client().models.generate_content(
-        model=MODEL,
-        contents=prompt
-        + "\n\nAnswer ONLY with JSON inside a ```json code block.",
-        config=types.GenerateContentConfig(
+    resp = generate(
+        prompt + "\n\nAnswer ONLY with JSON inside a ```json code block.",
+        types.GenerateContentConfig(
             tools=[types.Tool(google_search=types.GoogleSearch())],
             temperature=0.2,
         ),
