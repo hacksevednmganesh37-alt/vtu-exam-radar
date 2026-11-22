@@ -22,6 +22,13 @@ CONFIG = ROOT / "agent_config.yaml"
 # Names must match exactly what you typed when creating the agents in BAND.
 DATA_NAME = os.environ.get("RADAR_DATA_NAME", "Radar Data")
 BUILDER_NAME = os.environ.get("RADAR_BUILDER_NAME", "Radar Builder")
+DESK_NAME = os.environ.get("RADAR_DESK_NAME", "Radar Desk")
+AGENT_NAMES = {DATA_NAME, BUILDER_NAME, DESK_NAME}
+
+
+def is_agent(name: str) -> bool:
+    """True if the message came from one of our own agents (never auto-reply to these: avoids loops)."""
+    return name.strip() in AGENT_NAMES
 
 SENDER = re.compile(r"^\[(?P<sender>[^\]]+)\]:\s*(?P<text>.*)$", re.DOTALL)
 
@@ -71,7 +78,7 @@ def run_agent(config_key: str, handler: Handler) -> None:
                 await handler(sender, text, send)
             except Exception as err:  # tell the room instead of crashing silently
                 logging.exception("handler failed")
-                if sender:
+                if sender and not is_agent(sender):
                     await send(f"Sorry, something went wrong: {err}", [sender])
             return {"messages": []}
 
@@ -92,10 +99,10 @@ def run_agent(config_key: str, handler: Handler) -> None:
 def parse_command(text: str) -> dict:
     """'DATA_READY BMATS101 days=5 round=1 requested_by=Ganesh K' -> dict."""
     # remove any @mentions of our agents (names have spaces, so do it explicitly)
-    for name in (DATA_NAME, BUILDER_NAME):
+    for name in AGENT_NAMES:
         text = text.replace(f"@{name}", " ")
     text = text.strip()
-    for leftover in (DATA_NAME.split()[-1], BUILDER_NAME.split()[-1]):  # e.g. "Builder DATA_READY ..."
+    for leftover in {n.split()[-1] for n in AGENT_NAMES}:  # e.g. "Builder DATA_READY ..."
         if text.split(" ", 1)[0] == leftover:
             text = text.split(" ", 1)[1] if " " in text else ""
     # drop the human-readable summary we append in brackets: "... (3 papers, 40 questions)"
