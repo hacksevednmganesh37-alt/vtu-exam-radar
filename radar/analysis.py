@@ -414,7 +414,7 @@ def build_report(code: str, days: int, request: dict | None = None) -> dict:
     top = repeated[:12]
 
     try:
-        answers = model_answers(code, [r["question"] for r in top[:8]])
+        answers = model_answers(code, [r["question"] for r in top])
     except Exception as err:
         logging.warning("model answers failed: %s", err)
         answers = {}
