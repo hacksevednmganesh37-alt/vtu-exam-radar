@@ -44,12 +44,42 @@ def write_json(path: Path, data) -> None:
     path.write_text(json.dumps(data, indent=2, ensure_ascii=False))
 
 
-def log_message(code: str, sender: str, to: str, message: str) -> None:
-    """Keep the agent-to-agent conversation so the dashboard can show it."""
+def log_message(code: str, sender: str, to: str, message: str, req: str | None = None) -> None:
+    """Keep the agent-to-agent conversation so the dashboard and the web app can show it."""
+    entry = {"time": now(), "from": sender, "to": to, "message": message}
     path = work_dir(code) / "agent_log.json"
     log = read_json(path, [])
-    log.append({"time": now(), "from": sender, "to": to, "message": message})
-    write_json(path, log)
+    log.append(entry)
+    write_json(path, log[-60:])
+    if req:
+        r = load_request(req)
+        if r:
+            r.setdefault("events", []).append(entry)
+            save_request(r)
+
+
+# ---------- student requests (from the web app / Radar Desk) ----------
+
+REQ_DIR = WORK / "requests"
+
+
+def save_request(r: dict) -> None:
+    write_json(REQ_DIR / f"{r['id']}.json", r)
+
+
+def load_request(req_id: str) -> dict | None:
+    if not req_id or not all(c.isalnum() or c == "-" for c in req_id):
+        return None
+    return read_json(REQ_DIR / f"{req_id}.json", None)
+
+
+def days_until(exam_date: str) -> int:
+    try:
+        d = datetime.strptime(exam_date, "%Y-%m-%d").date()
+        left = (d - datetime.now(timezone.utc).date()).days
+    except (ValueError, TypeError):
+        left = 5
+    return max(1, min(left, 14))
 
 
 # ---------- DATA AGENT work ----------
@@ -207,11 +237,42 @@ Every id must appear in exactly one group. Questions:
 {questions}"""
 
 PLAN_PROMPT = """Make a {days}-day VTU exam study plan for {subject}.
+The student can study about {hours} hours per day.
+Modules the student says they are WEAK in: {weak}
 Module weightage from past papers (share of total marks): {weights}
 Most repeated questions: {repeated}
-Rules: highest-weight modules and most-repeated questions first; last day = revision + solving
-the top repeated questions. Keep tasks short and concrete.
-Return JSON: {{"plan": [{{"day": 1, "focus": "Module 2 - title", "tasks": ["task", "task"]}}]}}"""
+Rules:
+- Weak modules get extra time EARLY (not on the last day), but never skip any module.
+- Within each day, put the most-repeated questions first.
+- Split each day into time blocks that add up to about {hours} hours (e.g. "9:00-10:30").
+- Last day = revision + timed practice of the top repeated questions.
+- Keep tasks short and concrete.
+Return JSON: {{"plan": [{{"day": 1, "focus": "Module 2 - title", "tasks": ["(1.5h) task", "(1h) task"]}}]}}"""
+
+ANSWER_PROMPT = """You are a VTU maths/engineering tutor. For each exam question below, write a SHORT model answer
+a first-year student can revise from in 2 minutes: the key formula(s) and the solution steps (max 6 short lines).
+Use plain text maths (e.g. x^2, sqrt(), d/dx). Do not invent numbers that are not in the question;
+if the question has no numbers, show the general method.
+Return JSON: {{"answers": [{{"question": "same text as given", "answer": "step 1...\\nstep 2..."}}]}}
+Questions:
+{questions}"""
+
+
+def model_answers(code: str, questions: list[str]) -> dict[str, str]:
+    """Short revision answers for the top repeated questions (cached per subject)."""
+    cache = work_dir(code) / "answers.json"
+    known = read_json(cache, {})
+    missing = [q for q in questions if q not in known]
+    if missing:
+        listing = "\n".join(f"- {q}" for q in missing)
+        data = gemini.ask_json(ANSWER_PROMPT.format(questions=listing))
+        for item in data.get("answers", []):
+            if item.get("question") and item.get("answer"):
+                known[item["question"]] = item["answer"]
+        for q, a in zip(missing, [i.get("answer", "") for i in data.get("answers", [])]):
+            known.setdefault(q, a)  # fallback if the model rephrased the question text
+        write_json(cache, known)
+    return {q: known.get(q, "") for q in questions}
 
 
 def module_stats(dataset: dict) -> list[dict]:
@@ -254,16 +315,25 @@ def repeated_questions(dataset: dict) -> list[dict]:
     return result
 
 
-def build_report(code: str, days: int) -> dict:
+def build_report(code: str, days: int, request: dict | None = None) -> dict:
+    """Subject report. With a student request, the plan is personalised (days left, hours, weak modules)."""
     dataset = load_dataset(code)
     modules = module_stats(dataset)
     repeated = repeated_questions(dataset)
     top = repeated[:12]
 
+    answers = model_answers(code, [r["question"] for r in top[:8]])
+    for r in top:
+        r["answer"] = answers.get(r["question"], "")
+
+    hours = (request or {}).get("hours", 4)
+    weak = (request or {}).get("weak_modules", [])
+    weak_text = ", ".join(f"Module {m}" for m in weak) if weak else "none given"
     weights = ", ".join(f"Module {m['number']}: {m['share']:.0%}" for m in modules)
     rep_text = "; ".join(f"{r['question']} (asked {r['times']}x, Module {r['module']})" for r in top)
     plan = gemini.ask_json(PLAN_PROMPT.format(
-        days=days, subject=dataset["subject_name"], weights=weights, repeated=rep_text
+        days=days, subject=dataset["subject_name"], weights=weights, repeated=rep_text,
+        hours=hours, weak=weak_text,
     )).get("plan", [])
 
     report = {
@@ -277,7 +347,8 @@ def build_report(code: str, days: int) -> dict:
         "web_questions": dataset.get("web_questions", []),
         "study_plan": plan,
         "live": dataset.get("live", {}),
-        "agent_log": read_json(work_dir(code) / "agent_log.json", []),
+        "agent_log": (request or {}).get("events") or read_json(work_dir(code) / "agent_log.json", [])[-12:],
+        "student": {"hours": hours, "weak_modules": weak, "exam_date": (request or {}).get("exam_date")},
         "sample": False,
     }
     return report
