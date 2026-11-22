@@ -32,7 +32,13 @@ async def handle(sender: str, text: str, send) -> None:
             await send(f"On it! Reading the {code} question papers and checking the web for updates...", [sender])
         analysis.log_message(code, DATA_NAME, "papers + web", f"Reading every {code} past paper and checking vtu.ac.in for updates.", req)
 
-        dataset = await asyncio.to_thread(analysis.collect, code)
+        try:
+            dataset = await asyncio.to_thread(analysis.collect, code)
+        except Exception:
+            if req:
+                analysis.fail_request(req, code, DATA_NAME,
+                                      "Sorry, I couldn't read the papers right now (the AI service is busy). Please try again in a few minutes.")
+            raise
         summary = (f"{len(dataset['papers'])} papers, {len(dataset['questions'])} questions, "
                    f"{len(dataset['live']['notes'])} live notes")
         analysis.log_message(code, DATA_NAME, BUILDER_NAME, f"Collected {summary}. Please build the plan.", req)
