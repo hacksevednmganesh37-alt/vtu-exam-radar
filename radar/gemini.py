@@ -10,11 +10,12 @@ from google.genai import errors as genai_errors
 from google.genai import types
 
 # Change this in your Codespace if Google releases a newer model:
-#   export GEMINI_MODEL="gemini-2.5-flash"
-MODEL = os.environ.get("GEMINI_MODEL", "gemini-2.5-flash")
-# Each model has its own free-tier quota. If one is used up (HTTP 429) we try the next.
+#   export GEMINI_MODEL="gemini-3.5-flash"
+MODEL = os.environ.get("GEMINI_MODEL", "gemini-3.5-flash")
+# Each model has its own free-tier quota. If one is used up or busy we try the next.
 FALLBACKS = [m.strip() for m in os.environ.get(
-    "GEMINI_FALLBACK_MODELS", "gemini-2.5-flash-lite,gemini-2.0-flash").split(",") if m.strip()]
+    "GEMINI_FALLBACK_MODELS",
+    "gemini-3.5-flash-lite,gemini-3.1-flash-lite,gemini-flash-lite-latest,gemini-2.5-flash").split(",") if m.strip()]
 _exhausted: dict[str, float] = {}   # model -> time it ran out (skip it for a while)
 
 _client = None
@@ -41,8 +42,8 @@ def generate(contents, config):
     for model in models:
         try:
             return client().models.generate_content(model=model, contents=contents, config=config)
-        except genai_errors.ClientError as err:
-            if getattr(err, "code", None) not in (429, 404):
+        except genai_errors.APIError as err:  # 429 quota, 404 retired model, 5xx overloaded
+            if getattr(err, "code", None) not in (429, 404, 500, 503):
                 raise
             logging.warning("Gemini model %s unavailable (%s), trying the next one", model, err.code)
             _exhausted[model] = time.time()
