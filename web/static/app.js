@@ -13,7 +13,7 @@ async function loadSubjects() {
   const res = await fetch("/api/subjects");
   const list = await res.json();
   for (const s of list) {
-    const o = make("option", "", s.name === s.code ? s.code : `${s.name} (${s.code})`);
+    const o = make("option", "", s.name.includes(s.code) ? s.name : `${s.name} (${s.code})`);
     o.value = s.code;
     $("code").append(o);
   }
